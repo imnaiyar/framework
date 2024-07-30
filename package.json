@@ -41,6 +41,10 @@
     "luxon": "^3.4.4",
     "prettier-plugin-ejs": "^1.0.3"
   },
+  "files": [
+    "dist/**/*.js",
+    "dist/**/*.d.ts"
+  ],
   "imports": {
     "#handlers": [
       "./dist/handlers/index.js"
