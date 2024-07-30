@@ -1,6 +1,6 @@
 {
   "name": "@imnaiyar/framework",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A simple framework for discord bot based on discord.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -69,3 +69,4 @@
     ]
   }
 }
+
