@@ -16,6 +16,9 @@ export type LogLevel = {
 
   /** ANSI color for the custom log level, (This field will be ignored if the log level name provided already exists) */
   color?: string;
+
+  /** Unicode emoji */
+  emoji?: string;
 };
 export type LogLevels = "info" | "debug" | "warn" | "error";
 class Logger {
@@ -25,9 +28,9 @@ class Logger {
   constructor(private readonly options?: LoggerOption) {
     this.levels = new Map([
       ["debug", { name: "DEBUG", color: "\x1b[36m" }], // Cyan
-      ["info", { name: "INFO", color: "\x1b[32m" }], // Green
-      ["warn", { name: "WARN", color: "\x1b[33m" }], // Yellow
-      ["error", { name: "ERROR", color: "\x1b[31m" }], // Red
+      ["info", { name: "INFO", color: "\x1b[32m", emoji: "✔" }], // Green
+      ["warn", { name: "WARN", color: "\x1b[33m", emoji: "⚠" }], // Yellow
+      ["error", { name: "ERROR", color: "\x1b[31m", emoji: "☠" }], // Red
       ["custom", { name: "CUSTOM", color: "\x1b[35m" }], // Magenta, default custom level
     ]);
     if (options?.timestamp === false) this.timestamp = false;
@@ -66,12 +69,12 @@ class Logger {
           ? this.levels.get(level.level.name.toLowerCase()) || level.level
           : undefined
         : this.levels.get(level.toLowerCase());
-    if (typeof level === "object" && level.timestamp === false) this.timestamp = false;
+    const includeTimestamp = typeof level === "object" && level.timestamp === false ? false : this.timestamp;
     if (logLevel) {
-      let text = `[${logLevel.name}]`;
-      if (logLevel.color) text = logLevel.color + `[${logLevel.name}]\x1b[0m`;
+      let text = `${logLevel.emoji ? `${logLevel.emoji} ` : ""}[${logLevel.name}]`;
+      if (logLevel.color) text = logLevel.color + text + "\x1b[0m";
       if (typeof level === "object" && level.hideLevel) text = "";
-      if (this.timestamp) text = "\x1b[90m" + date + "\x1b[0m" + " " + text;
+      if (includeTimestamp) text = "\x1b[90m" + date + "\x1b[0m" + " " + text;
       console.log(text, ...content);
     } else {
       console.log(...content);
@@ -90,17 +93,32 @@ class Logger {
     this.log("warn", ...message);
   }
 
-  error(content: any): void;
-  error(content: string, err: any): void;
-  error(content: any | string, err?: any): void {
+  /**
+   * Logs an error level event
+   * @param content The error content to log
+   * @returns The error ID
+   */
+  error(content: any): string;
+
+  /**
+   * Logs an error level event
+   * @param content The error message to log
+   * @param err The error object
+   * @returns The error ID
+   */
+  error(content: string, err: any): string;
+
+  error(content: any | string, err?: any): string {
+    const errorId = crypto.randomUUID();
     const text = err && err instanceof Error ? content + " " + err.message : content instanceof Error ? content.message : content;
-    const colored = `\x1b[31m${text}\x1b[0m`;
+    const colored = `\x1b[31m[${errorId}] ${text}\x1b[0m`;
     if (this.singleLineError) {
       this.log("error", colored);
     } else {
       err ? this.log("error", colored, "\n", err) : this.log("error", colored);
     }
-    if (this.options?.errorWebhook) sendErrorLog(this.options.errorWebhook, content, err);
+    if (this.options?.errorWebhook) sendErrorLog(this.options.errorWebhook, content, err, errorId);
+    return errorId;
   }
 }
 
@@ -122,8 +140,7 @@ export interface LoggerOption {
   singleLineError?: boolean;
 }
 
-/*
-const logger = new Logger()
+/* const logger = new Logger();
 logger.debug("This is a debug message");
 logger.info("This is an info message");
 logger.warn("This is a warning message");

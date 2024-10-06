@@ -4,7 +4,7 @@ import util from "node:util";
 /**
  * Send error log to the provided discord webhook
  */
-export async function sendErrorLog(webhookUrl: string, content: any, err: any) {
+export async function sendErrorLog(webhookUrl: string, content: any, err: any, errorId?: string) {
   const webhookLogger = new WebhookClient({ url: webhookUrl });
   if (!content && !err) return;
   const embed = new EmbedBuilder().setColor("Blue").setAuthor({ name: err?.name ?? "Error" });
@@ -15,5 +15,7 @@ export async function sendErrorLog(webhookUrl: string, content: any, err: any) {
     value: `${content?.message || content || err?.message || "NA"}`,
   });
   const fullErr = await postToHaste(util.inspect(err ?? content, { depth: null })).catch(() => {});
-  webhookLogger?.send({ username: "Error Log", embeds: [embed], content: `${fullErr}` }).catch(() => {});
+  webhookLogger
+    ?.send({ username: "Error Log", embeds: [embed], content: `Error ID: ${errorId || "none"}\n${fullErr}` })
+    .catch(() => {});
 }
