@@ -27,7 +27,7 @@ class Logger {
   private singleLineError = true;
   constructor(private readonly options?: LoggerOption) {
     this.levels = new Map([
-      ["debug", { name: "DEBUG", color: "\x1b[36m" }], // Cyan
+      ["debug", { name: "DEBUG", color: "\x1b[36m", emoji: "" }], // Cyan
       ["info", { name: "INFO", color: "\x1b[32m", emoji: "✔" }], // Green
       ["warn", { name: "WARN", color: "\x1b[33m", emoji: "⚠" }], // Yellow
       ["error", { name: "ERROR", color: "\x1b[31m", emoji: "☠" }], // Red
@@ -112,7 +112,8 @@ class Logger {
 
   error(content: any | string, err?: any, errorId?: string): string {
     errorId ??= typeof err === "string" ? err : crypto.randomUUID();
-    const text = err && err instanceof Error ? content + " " + err.message : content instanceof Error ? content.message : content;
+    const text =
+      err && err instanceof Error ? content + ": " + err.message : content instanceof Error ? content.message : content;
     const colored = `\x1b[31m[${errorId}] ${text}\x1b[0m`;
     if (this.singleLineError) {
       this.log("error", colored);
@@ -142,15 +143,17 @@ export interface LoggerOption {
   singleLineError?: boolean;
 }
 
-/* const logger = new Logger();
+const logger = new Logger();
 logger.debug("This is a debug message");
 logger.info("This is an info message");
 logger.warn("This is a warning message");
 logger.error("This is an error message: ", new Error("This is a Test"));
-
+logger.error("hello", "123");
+logger.error("hello", new Error("hmmm"));
+logger.error("hello", new Error("what the hell"), "123");
 // Adding a custom log level
 logger.addCustomLevel("trace", "\x1b[34m"); // Blue
 logger.log("trace", "This is a trace message");
 logger.log({ level: { name: "Test" }, hideLevel: true }, "Hi");
 // Logging with a non-existing level
-logger.log("nonexistent", "This should show as UNKNOWN"); */
+logger.log("nonexistent", "This should show as UNKNOWN");
