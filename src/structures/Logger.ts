@@ -96,20 +96,22 @@ class Logger {
   /**
    * Logs an error level event
    * @param content The error content to log
+   * @param errorId The error ID
    * @returns The error ID
    */
-  error(content: any): string;
+  error(content: any, errorId?: string): string;
 
   /**
    * Logs an error level event
    * @param content The error message to log
    * @param err The error object
+   * @param errorId The error ID
    * @returns The error ID
    */
-  error(content: string, err: any): string;
+  error(content: string, err: any, errorId?: string): string;
 
-  error(content: any | string, err?: any): string {
-    const errorId = crypto.randomUUID();
+  error(content: any | string, err?: any, errorId?: string): string {
+    errorId ??= typeof err === "string" ? err : crypto.randomUUID();
     const text = err && err instanceof Error ? content + " " + err.message : content instanceof Error ? content.message : content;
     const colored = `\x1b[31m[${errorId}] ${text}\x1b[0m`;
     if (this.singleLineError) {
