@@ -143,7 +143,7 @@ export interface LoggerOption {
   singleLineError?: boolean;
 }
 
-const logger = new Logger();
+/* const logger = new Logger();
 logger.debug("This is a debug message");
 logger.info("This is an info message");
 logger.warn("This is a warning message");
@@ -157,3 +157,4 @@ logger.log("trace", "This is a trace message");
 logger.log({ level: { name: "Test" }, hideLevel: true }, "Hi");
 // Logging with a non-existing level
 logger.log("nonexistent", "This should show as UNKNOWN");
+ */
