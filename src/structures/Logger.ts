@@ -2,7 +2,6 @@ import { sendErrorLog } from "#src/utils/sendErrorLogs";
 import { DateTime } from "luxon";
 import util from "node:util";
 import fs from "node:fs";
-import { EmbedBuilder } from "discord.js";
 
 export interface LogOptions {
   level?: LogLevel;
