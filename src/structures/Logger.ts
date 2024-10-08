@@ -1,5 +1,8 @@
 import { sendErrorLog } from "#src/utils/sendErrorLogs";
 import { DateTime } from "luxon";
+import util from "node:util";
+import fs from "node:fs";
+import { EmbedBuilder } from "discord.js";
 
 export interface LogOptions {
   level?: LogLevel;
@@ -25,6 +28,7 @@ class Logger {
   private levels: Map<string, LogLevel>;
   private timestamp = true;
   private singleLineError = true;
+  private logToFile = false;
   constructor(private readonly options?: LoggerOption) {
     this.levels = new Map([
       ["debug", { name: "DEBUG", color: "\x1b[36m", emoji: "" }], // Cyan
@@ -36,6 +40,7 @@ class Logger {
     if (options?.timestamp === false) this.timestamp = false;
     if (options?.env === "development") this.singleLineError = false;
     if (options?.singleLineError === false) this.singleLineError = false;
+    if (options?.logToFile) this.logToFile = true;
   }
   // hell
   addCustomLevel(name: string, color: string): void {
@@ -121,6 +126,7 @@ class Logger {
       err ? this.log("error", colored, "\n", err) : this.log("error", colored);
     }
     if (this.options?.errorWebhook) sendErrorLog(this.options.errorWebhook, content, err, errorId);
+    if (this.logToFile) logErrorsToFile(errorId, err instanceof Error ? err : content, this.options?.timezone);
     return errorId;
   }
 }
@@ -141,9 +147,29 @@ export interface LoggerOption {
 
   /** If true, only logs error message (`true` in "production" environment, unless provided otheriwse) */
   singleLineError?: boolean;
+
+  /**
+   * Write errors to a log-file, it'll log all the errors in the "logs" folder, if there is no folder with such name, one will be created
+   */
+  logToFile?: boolean;
 }
 
-/* const logger = new Logger();
+function logErrorsToFile(errorId: string, err: Error, timezone?: string): void {
+  const date = DateTime.now().setZone(timezone).toFormat("dd LLL yyyy hh:mm:ss a");
+  const formattedErrorString = `[${date}]: [${errorId}]`;
+  const errorStringified = util.inspect(err, { depth: Infinity });
+  const joinedValue = `${formattedErrorString}:\n${errorStringified}\n` + "-".repeat(50) + "\n\n\n";
+  if (!fs.existsSync("logs")) fs.mkdirSync("logs");
+  fs.appendFile(
+    `logs/${DateTime.now().setZone(timezone).toFormat("dd LL yyyy").split(" ").join("-").trim()}.log`,
+    joinedValue,
+    (err) => {
+      if (err) console.error("Failed to log error to file: ", err);
+    },
+  );
+}
+
+/* const logger = new Logger({ logToFile: true });
 logger.debug("This is a debug message");
 logger.info("This is an info message");
 logger.warn("This is a warning message");
@@ -156,5 +182,16 @@ logger.addCustomLevel("trace", "\x1b[34m"); // Blue
 logger.log("trace", "This is a trace message");
 logger.log({ level: { name: "Test" }, hideLevel: true }, "Hi");
 // Logging with a non-existing level
-logger.log("nonexistent", "This should show as UNKNOWN");
- */
+logger.log("nonexistent", "This should show as UNKNOWN"); */
+
+export enum LogColors {
+  Red = "\x1b[36m",
+  Green = "\x1b[32m",
+  Yellow = "\x1b[33m",
+  Blue = "\x1b[34m",
+  Magenta = "\x1b[35m",
+  Cyan = "\x1b[36m",
+  White = "\x1b[37m",
+  Black = "\x1b[30m",
+  Reset = "\x1b[0m",
+}
