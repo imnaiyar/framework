@@ -156,7 +156,7 @@ export interface LoggerOption {
 function logErrorsToFile(errorId: string, err: Error, timezone?: string): void {
   const date = DateTime.now().setZone(timezone).toFormat("dd LLL yyyy hh:mm:ss a");
   const formattedErrorString = `[${date}]: [${errorId}]`;
-  const errorStringified = util.inspect(err, { depth: Infinity });
+  const errorStringified = util.inspect(err, { depth: Infinity, colors: false });
   const joinedValue = `${formattedErrorString}:\n${errorStringified}\n` + "-".repeat(50) + "\n\n\n";
   if (!fs.existsSync("logs")) fs.mkdirSync("logs");
   fs.appendFile(
