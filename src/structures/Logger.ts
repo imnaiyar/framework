@@ -75,7 +75,7 @@ class Logger {
         : this.levels.get(level.toLowerCase());
     const includeTimestamp = typeof level === "object" && level.timestamp === false ? false : this.timestamp;
     if (logLevel) {
-      let text = `${logLevel.emoji ? `${logLevel.emoji} ` : ""}[${logLevel.name}]`;
+      let text = `${logLevel.emoji ? `${logLevel.emoji} ` : ""}《 ${logLevel.name} 》`;
       if (logLevel.color) text = logLevel.color + text + "\x1b[0m";
       if (typeof level === "object" && level.hideLevel) text = "";
       if (includeTimestamp) text = "\x1b[90m" + date + "\x1b[0m" + " " + text;
