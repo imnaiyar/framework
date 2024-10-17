@@ -122,9 +122,9 @@ class Logger {
     if (this.singleLineError) {
       this.log("error", colored);
     } else {
-      err ? this.log("error", colored, "\n", err) : this.log("error", colored);
+      err && typeof err !== "string" ? this.log("error", colored, "\n", err) : this.log("error", colored, content);
     }
-    if (this.options?.errorWebhook) sendErrorLog(this.options.errorWebhook, content, err, errorId);
+    if (this.options?.errorWebhook) sendErrorLog(errorId, this.options.errorWebhook, content, err);
     if (this.logToFile) logErrorsToFile(errorId, err instanceof Error ? err : content, this.options?.timezone);
     return errorId;
   }
@@ -162,7 +162,7 @@ function logErrorsToFile(errorId: string, err: Error, timezone?: string): void {
   fs.appendFile(
     `logs/${DateTime.now().setZone(timezone).toFormat("dd LL yyyy").split(" ").join("-").trim()}.log`,
     joinedValue,
-    (err) => {
+    (err: any) => {
       if (err) console.error("Failed to log error to file: ", err);
     },
   );
@@ -194,3 +194,4 @@ export enum LogColors {
   Black = "\x1b[30m",
   Reset = "\x1b[0m",
 }
+
