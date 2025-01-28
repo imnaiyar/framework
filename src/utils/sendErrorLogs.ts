@@ -4,7 +4,7 @@ import util from "node:util";
 /**
  * Send error log to the provided Discord webhook using fetch and APIEmbed structure.
  */
-export async function sendErrorLog(errorId, webhookUrl, content, err) {
+export async function sendErrorLog(errorId: string, webhookUrl: string, content: any, err?: any) {
   const error = err instanceof Error ? err.stack : content.stack || content;
   const embed = {
     color: 0x3498db, // Blue
